@@ -1,0 +1,12 @@
+{
+    "data": {
+        "name": "FLIR Thermal Dataset",
+        "path": "/Data/FLIR_ADAS_IR_ObjDet_Dataset/FLIR_ADAS_1_3",
+        "eval_sequences": ["video"]
+    },
+    
+    "norm_values": {
+        "ldr": 255,
+        "hdr": 16383
+    }
+}
