@@ -20,20 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
+
 import json
-import numpy as np
 from FLIR_Thermal_Dataset_reader.FLIR_Thermal_Dataset_reader import flir_thermal_dataset
 from temporal_incoherence_measure.temporal_incoherence_measure import calculate_temporal_incoherence_measure
 
-def main():
-
-    try:
-        config = json.load(open("./config.json"))
-    except FileNotFoundError:
-        print("Could not find configuration file 'config.json'.")
-        sys.exit(-1)
-        
+if __name__ == "__main__":
+    config = json.load(open("./config.json"))
     print("Calculate temporal incoherence measure for data set '" + config['data']['name'] + "'.")
     print("Progress: ")
 
@@ -46,15 +39,14 @@ def main():
     # get evaluation sequences
     eval_sequences = config['data']['eval_sequences']
     if len(eval_sequences) == 0:
-        print("No evaluation sequence provided in config file.")
-        sys.exit(-1)
+        raise RuntimeError("No evaluation sequence provided in config file.")
+
 
     # get normalization values
     norm_value_hdr = config['norm_values']['hdr']
     norm_value_ldr = config['norm_values']['ldr']
     if norm_value_hdr <= 0 or norm_value_ldr <= 0:
-        print("Normalization values provided in config file are invalid.")
-        sys.exit(-1)
+        raise ValueError("Normalization values provided in config file are invalid.")
 
     # loop over all evaluation sequences
     global_temporal_incoherence = 0
@@ -62,10 +54,10 @@ def main():
     number_of_images = 0
     for sequence_name in eval_sequences:
         if sequence_name not in data:
-            print("Evaluation sequence '" + sequence_name + "' not found in evaluation dataset.")
-            sys.exit(-1)
+            raise RuntimeError("Evaluation sequence '" + sequence_name + "' not found in evaluation dataset.")
         number_of_images += len(data[sequence_name]['hdr'])
-        curr_global_temporal_incoherence, curr_local_temporal_incoherence = calculate_temporal_incoherence_measure(data[sequence_name]['hdr'], data[sequence_name]['ldr'], norm_value_hdr, norm_value_ldr)
+        curr_global_temporal_incoherence, curr_local_temporal_incoherence = calculate_temporal_incoherence_measure(
+            data[sequence_name]['hdr'], data[sequence_name]['ldr'], norm_value_hdr, norm_value_ldr)
         global_temporal_incoherence += curr_global_temporal_incoherence
         local_temporal_incoherence += curr_local_temporal_incoherence
 
@@ -74,9 +66,5 @@ def main():
     local_temporal_incoherence /= len(eval_sequences)
 
     print("{} sequences evaluated with {} HDR/LDR image pairs in total.".format(len(eval_sequences), number_of_images))
-    print("Global temporal incoherence: ", global_temporal_incoherence)
-    print("Local temporal incoherence: ", local_temporal_incoherence)
-
-
-if __name__ == "__main__":
-    main()
+    print("Global temporal incoherence: {}".format(global_temporal_incoherence))
+    print("Local temporal incoherence: {}".format(local_temporal_incoherence))

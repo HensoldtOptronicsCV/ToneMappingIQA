@@ -20,19 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
+
 import json
 from FLIR_Thermal_Dataset_reader.FLIR_Thermal_Dataset_reader import flir_thermal_dataset
 from loss_of_contrast_measure.loss_of_contrast_measure import calculate_loss_of_contrast
 
-def main():
-    try:
-        config = json.load(open("./config.json"))
-    except FileNotFoundError:
-        print("Could not find configuration file 'config.json'.")
-        sys.exit(-1)
-        
-    print("Calculate loss of contrast measure for data set '" + config['data']['name'] + "'.")
+if __name__ == "__main__":
+    config = json.load(open("./config.json"))
+    print("Calculate loss of contrast measure for data set '{}'.".format(config['data']['name']))
     print("Progress: ")
 
     # get evaluation data
@@ -40,22 +35,19 @@ def main():
     if config['data']['name'] == "FLIR Thermal Dataset":
         data_reader = flir_thermal_dataset
     else:
-        print("Currently, only 'FLIR Thermal Dataset' is supported.")
-        sys.exit(-1)
+        raise RuntimeError("Currently, only 'FLIR Thermal Dataset' is supported.")
     data = data_reader(dataset_path)
     
     # get evaluation sequences
     eval_sequences = config['data']['eval_sequences']
     if len(eval_sequences) == 0:
-        print("No evaluation sequence provided in config file.")
-        sys.exit(-1)
+        raise RuntimeError("No evaluation sequence provided in config file.")
         
     # get normalization values
     norm_value_hdr = config['norm_values']['hdr']
     norm_value_ldr = config['norm_values']['ldr']
     if norm_value_hdr <= 0 or norm_value_ldr <= 0:
-        print("Normalization values provided in config file are invalid.")
-        sys.exit(-1)
+        raise ValueError("Normalization values provided in config file are invalid.")
     
     # loop over all evaluation sequences
     global_loss_of_contrast = 0
@@ -63,8 +55,7 @@ def main():
     number_of_images = 0
     for sequence_name in eval_sequences:
         if sequence_name not in data:
-            print("Evaluation sequence '" + sequence_name + "' not found in evaluation dataset.")
-            sys.exit(-1)
+            raise RuntimeError("Evaluation sequence '" + sequence_name + "' not found in evaluation dataset.")
         number_of_images += len(data[sequence_name]['hdr'])
         curr_global_loss_of_contrast, curr_local_loss_of_contrast = \
             calculate_loss_of_contrast(data[sequence_name]['hdr'], data[sequence_name]['ldr'], norm_value_hdr, norm_value_ldr)
@@ -75,10 +66,6 @@ def main():
     global_loss_of_contrast /= len(eval_sequences)
     local_loss_of_contrast /= len(eval_sequences)
     
-    print(str(len(eval_sequences)) + " sequences evaluated with " + str(number_of_images) + " HDR/LDR image pairs in total.")
-    print("Loss of global contrast: ", global_loss_of_contrast)
-    print("Loss of local contrast: ", local_loss_of_contrast)
-
-
-if __name__ == "__main__":
-    main()
+    print("{} sequences evaluated with {} HDR/LDR image pairs in total.".format(len(eval_sequences), number_of_images))
+    print("Loss of global contrast: {}".format(global_loss_of_contrast))
+    print("Loss of local contrast: {}".format(local_loss_of_contrast))
