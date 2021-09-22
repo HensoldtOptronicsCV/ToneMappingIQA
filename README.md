@@ -18,13 +18,38 @@ python ./calculate_temporal_incoherence_measure.py
 python ./calculate_over_unde_exposure_measure.py
 ```
 
+If you want to apply the noise visibility measure yourself, just open the terminal and call the function as shown below. For the parameters enter your folder paths. 
+Make sure that the image pairs, you want to compare (reference hdr image with noisy hdr image and both tonemapped versions) have the same alphabetical order, otherwise the wrong images will be compared.
+```bash
+cd measures
+python ./calculate_noise_visibility_measure.py 'hdr_ref_image_path' 'hdr_noisy_image_path' 'tmo_ref_image_path' 'tmo_noisy_image_path'
+```
+
+You can also call the function as shown below to get additional information about the required Parameters:
+```bash
+cd measures
+python ./calculate_noise_visibility_measure.py -h
+```
+
+If you want to add poisson noise to a set of images, you can use our included tool "add_poisson_noise". To use it you just open a terminal, and call the function as shown below.
+For the parameters enter the folder path to the set of images you want to add noise to, and a folder path where you want the noisy images to be saved to.
+If you want to add noise to non 16 bit images, you should change the 'norm_value' value inside the 'add_poisson_noise.py' file according to the bit depth of your images (for example 255 for 8 bit images)
+```bash
+cd measures
+python ./add_poisson_noise.py 'ref_image_path' 'noisy_image_path'
+```
+
 Dependencies:
 - numpy
 - json
 - sys
 - cv2 (OpenCV)
+- os
+- scipy
+- math
+- copy
 
-*Note:* If you use your own dataset, you have to write your own dataset parser. We currently only provide a parser for the FLIR Thermal Dataset. It may help you to format your dataset similarly to the FLIR Thermal Dataset.
+*Note:* If you use your own dataset, you have to write your own dataset parser (except for the noise visibility measure). We currently only provide a parser for the FLIR Thermal Dataset. It may help you to format your dataset similarly to the FLIR Thermal Dataset.
 
 ## Deviation from the Paper
 As we slightly changed some image pre-processing techniques after the final submission of the paper, the measures calculated with the code provided here slightly deviate from the numbers mentioned in Table 2.
@@ -38,8 +63,10 @@ Noise Visibility: n.a. \
 Global Temporal Incoherence: 0.00017 (instead of 0.0002) \
 Local Temporal Incoherence: 0.00481 (instead of 0.0253)
 
-## Todos
-The code for the fourth measure called 'noise visibility' is missing, but will follow as soon as possible.
+Furthermore, we changed some parts of the code for the noise visibility measure compared to the original version used when writing the paper. Hence, the numbers for noise visibility as mentioned for several tone mapping operators in the paper are likely to deviate.
+
+## Acknowledgments
+We like to thank the students Konstantina Mavrommati (RWTH Aachen) and Axel Goedrich (TH Nuernberg) for supporting us in implementing and revising the code for the noise visibility measure.
 
 ## Cite us
 If you use the code, the plots, or the findings of our paper, then please cite us:

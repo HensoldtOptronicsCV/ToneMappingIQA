@@ -20,18 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
+
 import json
 from FLIR_Thermal_Dataset_reader.FLIR_Thermal_Dataset_reader import flir_thermal_dataset
 from over_under_exposure_measure.over_under_exposure_measure import calculate_over_and_under_exposure_measure
 
-def main():
-    try:
-        config = json.load(open("./config.json"))
-    except FileNotFoundError:
-        print("Could not find configuration file 'config.json'.")
-        sys.exit(-1)
-        
+if __name__ == "__main__":
+    config = json.load(open("./config.json"))
     print("Calculate over- and underexposure measure for data set '" + config['data']['name'] + "'.")
     print("Progress: ")
     
@@ -40,15 +35,13 @@ def main():
     if config['data']['name'] == "FLIR Thermal Dataset":
         data_reader = flir_thermal_dataset
     else:
-        print("Currently, only 'FLIR Thermal Dataset' is supported.")
-        sys.exit(-1)
+        raise RuntimeError("Currently, only 'FLIR Thermal Dataset' is supported.")
     data = data_reader(dataset_path)
     
     # get evaluation sequences
     eval_sequences = config['data']['eval_sequences']
     if len(eval_sequences) == 0:
-        print("No evaluation sequence provided in config file.")
-        sys.exit(-1)
+        raise RuntimeError("No evaluation sequence provided in config file.")
     
     # loop over all evaluation sequences
     over_exposure = 0
@@ -56,8 +49,7 @@ def main():
     number_of_images = 0
     for sequence_name in eval_sequences:
         if sequence_name not in data:
-            print("Evaluation sequence '" + sequence_name + "' not found in evaluation dataset.")
-            sys.exit(-1)
+            raise RuntimeError("Evaluation sequence '{}' not found in evaluation dataset.".format(sequence_name))
         number_of_images += len(data[sequence_name]['ldr'])
         curr_over_exposure, curr_under_exposure = calculate_over_and_under_exposure_measure(data[sequence_name]['ldr'])
         over_exposure += curr_over_exposure
@@ -67,10 +59,6 @@ def main():
     over_exposure /= len(eval_sequences)
     under_exposure /= len(eval_sequences)
         
-    print(str(len(eval_sequences)) + " sequences evaluated with " + str(number_of_images) + " LDR images in total.")
-    print("under-exposure measure [%]: ", under_exposure)
-    print("over-exposure measure [%]: ", over_exposure)
-
-
-if __name__ == "__main__":
-    main()
+    print("{} sequences evaluated with {} LDR images in total.".format(len(eval_sequences), str(number_of_images)))
+    print("under-exposure measure [%]: {}".format(under_exposure))
+    print("over-exposure measure [%]: {}".format(over_exposure))
