@@ -23,6 +23,7 @@
 
 # Third party imports
 import numpy as np
+import os
 from scipy.integrate import trapz, cumtrapz
 from scipy import interpolate
 from scipy import fft
@@ -71,14 +72,14 @@ def precompute_common_variables(image, metric_par):
     mtf_filter = hdrvdp_mtf(rho2, metric_par)
 
     # load spectral sensitivity curves
-    lamda, S_lmsr = load_spectral_response(
-        'noise_visibility_measure/data/log_cone_smith_pokorny_1975.csv')
+    base_path = os.path.dirname(__file__)
+    lamda, S_lmsr = load_spectral_response(os.path.join(base_path, 'data/log_cone_smith_pokorny_1975.csv'))
     S_lmsr[S_lmsr == 0.0] = np.amin(S_lmsr)
     base = 10 * np.ones(S_lmsr.shape)
     S_lmsr = np.power(base, S_lmsr)
-    _, S_rod = load_spectral_response('noise_visibility_measure/data/cie_scotopic_lum.txt')
+    _, S_rod = load_spectral_response(os.path.join(base_path, 'data/cie_scotopic_lum.txt'))
     S_lmsr = np.concatenate((S_lmsr, S_rod), axis=1)
-    _, IMG_E = load_spectral_response('noise_visibility_measure/data/d65.csv')
+    _, IMG_E = load_spectral_response(os.path.join(base_path, 'data/d65.csv'))
     metric_par.spectral_emission = IMG_E
 
     return lamda, S_lmsr, rho2, mtf_filter, IMG_E

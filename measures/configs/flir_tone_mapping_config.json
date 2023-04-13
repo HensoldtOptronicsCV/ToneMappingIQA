@@ -6,7 +6,7 @@
 
     "experiment": {
         "name": "FLIR Tone Mapping",
-        "path": "<dataset_path>/FLIR_ADAS_1_3/",
+        "path": "<results_path>/FLIR_ADAS_1_3/",
         "eval_sequences": ["video"]
     },
     

@@ -22,12 +22,14 @@
 
 
 # Standard library imports
-import os
 import argparse
+import glob
+import os
 
 # Third party imports
 import numpy as np
 import cv2
+from tqdm import tqdm
 
 if __name__ == "__main__":
     # parsing input arguments
@@ -44,24 +46,22 @@ if __name__ == "__main__":
     if not os.path.exists(args.noisy_image_path):
         os.makedirs(args.noisy_image_path)
 
-    # setting variables for progress bar
-    num_samples = len(os.listdir(args.ref_image_path))   # number of needed iterations
-    steps = np.clip(num_samples, 1, 100)                         # determines how often the Progress bar will be refreshed (roughly)
-    iterations_to_print = np.linspace(1, num_samples, round(steps), dtype=int)  # iterations where the progress bar will be updated
-    counter = 0
+    # get list of images to be converted
+    ref_image_dir_list = []
+    for filename in glob.glob(os.path.join(args.ref_image_path, "*.tiff")):  # assuming tiff
+        ref_image_dir_list.append(filename)
+    ref_image_dir_list = sorted(ref_image_dir_list)
 
-    # for loop iterating trough images in given folder and saving version with added poisson noise in noisy_image_path
-    for image_name in sorted(os.listdir(args.ref_image_path)):
-        image = cv2.imread(str(args.ref_image_path + "/" + image_name), cv2.IMREAD_ANYDEPTH)
-        row, col = image.shape
-        poisson = np.random.poisson(poisson_lambda, (row, col))
-        poisson = poisson.reshape(row, col)
-        noisy_image = np.clip(image + poisson, 0, norm_value)
-        noisy_image = np.array(noisy_image, dtype=np.uint16)
-        filename = 'noisy' + image_name
-        cv2.imwrite(args.noisy_image_path + '/' + filename, noisy_image)
-        counter += 1
+    # for loop iterating through images in given folder and saving version with added poisson noise in noisy_image_path
+    with tqdm(total=len(ref_image_dir_list)) as pbar:
+        for image_name in ref_image_dir_list:
+            image = cv2.imread(image_name, cv2.IMREAD_ANYDEPTH)
+            row, col = image.shape
+            poisson = np.random.poisson(poisson_lambda, (row, col))
+            poisson = poisson.reshape(row, col)
+            noisy_image = np.clip(image + poisson, 0, norm_value)
+            noisy_image = np.array(noisy_image, dtype=np.uint16)
+            noise_image_file = os.path.join(args.noisy_image_path, os.path.basename(image_name))
+            cv2.imwrite(noise_image_file, noisy_image)
 
-        # refresh progress bar
-        if any(counter == iterations_to_print):
-            print('\r', "Progress: {}%".format(round(counter / num_samples * 100 - 0.5)), end="")
+            pbar.update(1)
