@@ -63,7 +63,7 @@ class FlirThermalLoader(BaseLoader):
 
         subset = {"ldr": images_ldr, "hdr": images_hdr}
 
-        if self.load_noisy_data and Path(self.hdr_noisy_image_dir).exists():
+        if self.load_noisy_data and (dir_ / Path(self.hdr_noisy_image_dir)).exists():
             images_hdr_noisy = [file for file in sorted((dir_ / FlirThermalLoader.hdr_noisy_image_dir).iterdir()) if
                                 file.is_file() and file.suffix == FlirThermalLoader.image_type_hdr]
             assert len(images_hdr_noisy) == self.__dict__.get(f"{dir_.name}_set_size")
@@ -80,7 +80,7 @@ class ExperimentLoader(BaseLoader):
 
         subset = {"ldr": images_ldr}
 
-        if self.load_noisy_data and Path(self.ldr_noisy_image_dir).exists():
+        if self.load_noisy_data and (dir_ / Path(self.ldr_noisy_image_dir)).exists():
             images_ldr_noisy = [file for file in sorted((dir_ / ExperimentLoader.ldr_noisy_image_dir).iterdir()) if
                                 file.is_file() and file.suffix == ExperimentLoader.image_type_ldr]
             assert len(images_ldr_noisy) == self.__dict__.get(f"{dir_.name}_set_size")
