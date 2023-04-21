@@ -9,27 +9,8 @@ The code consists of \
 The measures are taken and re-implemented from the paper "A comparative review of tone-mapping algorithms for high dynamic range video" by Eilertsen et al., Eurographics 2017. Thanks to the participation of Gabriel Eilertsen during our re-implementation, the code is very close to the original code used in his paper. However, we only support one-channel images as we work with video data acquired by thermal infrared cameras.
 
 ## Installation and Dependencies
-The code is written in Python and tested under Python 3.8.3. Simply clone the repository and go to directory 'plots' for the original plots provided in the paper or to directory 'measures' for the Python code of the evaluation measures. \
-If you want to apply the measures by yourself, then adjust the measures/config.json file to set the dataset you want to evaluate and to set the normalization values (depending on the bit depth of your HDR and LDR images), open a terminal, and call:
-```bash
-cd measures
-python ./calculate_loss_of_contrast_measure.py
-python ./calculate_temporal_incoherence_measure.py
-python ./calculate_over_unde_exposure_measure.py
-```
-
-If you want to apply the noise visibility measure yourself, just open the terminal and call the function as shown below. For the parameters enter your folder paths. 
-Make sure that the image pairs, you want to compare (reference hdr image with noisy hdr image and both tonemapped versions) have the same alphabetical order, otherwise the wrong images will be compared.
-```bash
-cd measures
-python ./calculate_noise_visibility_measure.py 'hdr_ref_image_path' 'hdr_noisy_image_path' 'tmo_ref_image_path' 'tmo_noisy_image_path'
-```
-
-You can also call the function as shown below to get additional information about the required Parameters:
-```bash
-cd measures
-python ./calculate_noise_visibility_measure.py -h
-```
+The code is written in Python and tested under Python 3.8. Simply clone the repository and go to directory 'plots' for the original plots provided in the paper or to directory 'measures' for the Python code of the evaluation measures. \
+If you want to apply the measures by yourself, then adjust the measures/config.json file to set the dataset you want to evaluate and to set the normalization values (depending on the bit depth of your HDR and LDR images).
 
 If you want to add poisson noise to a set of images, you can use our included tool "add_poisson_noise". To use it you just open a terminal, and call the function as shown below.
 For the parameters enter the folder path to the set of images you want to add noise to, and a folder path where you want the noisy images to be saved to.
@@ -39,15 +20,7 @@ cd measures
 python ./add_poisson_noise.py 'ref_image_path' 'noisy_image_path'
 ```
 
-Dependencies:
-- numpy
-- json
-- sys
-- cv2 (OpenCV)
-- os
-- scipy
-- math
-- copy
+Dependencies: see environment.yaml
 
 *Note:* If you use your own dataset, you have to write your own dataset parser (except for the noise visibility measure). We currently only provide a parser for the FLIR Thermal Dataset. It may help you to format your dataset similarly to the FLIR Thermal Dataset.
 
